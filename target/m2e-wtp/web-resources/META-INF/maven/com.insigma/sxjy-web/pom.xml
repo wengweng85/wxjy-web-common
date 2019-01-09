@@ -1,0 +1,93 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.insigma</groupId>
+    <packaging>war</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>sxjy-web</name>
+    <url>http://maven.apache.org</url>
+    <!-- 父级依赖 -->
+    <parent>
+        <groupId>com.insigma</groupId>
+        <artifactId>wxjy-parent</artifactId>
+        <version>1.0.3</version>
+    </parent>
+
+    <dependencies>
+        <!--自定义jar包 -->
+         <dependency>
+            <groupId>com.insigma</groupId>
+            <artifactId>wxjy-common</artifactId>
+            <version>1.0.7-SNAPSHOT</version>
+        </dependency>
+        <!-- sxjyggfw-common-model-->
+        <dependency>
+            <groupId>com.insigma</groupId>
+            <artifactId>sxjyggfw-common-model</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>sxjy-web</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <path>/sxjy-web</path>
+                    <port>8080</port>
+                    <server>tomcat7</server>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- 发布命令   mvn deploy -Dmaven.test.skip=true -->
+    <!-- nexus私服配置 -->
+    <repositories>
+        <repository>
+            <id>public</id>
+            <name>maven-public</name>
+            <url>http://115.233.221.133:58081/repository/maven-public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <!-- 发布命令   mvn deploy -Dmaven.test.skip=true -->
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>maven-releases</name>
+            <url>http://115.233.221.133:58081/repository/maven-releases/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>maven-snapshots</name>
+            <url>http://115.233.221.133:58081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <artifactId>sxjy-web</artifactId>
+</project>
