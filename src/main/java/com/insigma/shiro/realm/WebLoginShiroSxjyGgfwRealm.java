@@ -108,7 +108,7 @@ public class WebLoginShiroSxjyGgfwRealm extends AuthorizingRealm {
 			List<SPermission> permlist=SUserUtil.filterPersmList(spermlist);
 			suser.setSpermlist(permlist);
 			setSession(SUserUtil.SHIRO_CURRENT_USER_INFO,suser);
-			SUserUtil.setCurrentUser(suser);
+			setSession(SUserUtil.SHIRO_CURRENT_PERM_LIST_INFO,permlist);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

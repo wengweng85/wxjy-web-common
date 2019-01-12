@@ -1,29 +1,29 @@
 package com.insigma.common.util;
 
+import com.insigma.mvc.model.SPermission;
+import com.insigma.mvc.model.SUser;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.insigma.mvc.model.SPermission;
-import com.insigma.mvc.model.SUser;
 
 /**
  * 系统工具类
  * @author wengsh
  *
  */
-public class SUserUtil {
+public class SUserUtil_new {
 
 	public static final String SHIRO_CURRENT_USER_INFO="SHIRO_CURRENT_USER_INFO";
 	public static final String SHIRO_CURRENT_PERM_LIST_INFO="SHIRO_CURRENT_PERM_LIST_INFO";
-	
-	
+
+
 	 /** * 保存变量的ThreadLocal，保持在同一线程中同步数据. */
     private static final ThreadLocal threadLocal = new ThreadLocal();
 
     /** * 工具类的protected构造方法. */
-    protected SUserUtil() {
+    protected SUserUtil_new() {
     }
 
 	 /**

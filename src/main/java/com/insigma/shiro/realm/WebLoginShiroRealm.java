@@ -110,10 +110,8 @@ public class WebLoginShiroRealm extends AuthorizingRealm {
 			//用户权限
 			List<SPermission> spermlist=httpRequestUtils.httpPostReturnList(URLConstraints.API_PERMISSIONS ,map, SPermission.class);
 			List<SPermission> permlist=SUserUtil.filterPersmList(spermlist);
-			suser.setSpermlist(permlist);
 			setSession(SUserUtil.SHIRO_CURRENT_USER_INFO,suser);
-			SUserUtil.setCurrentUser(suser);
-
+			setSession(SUserUtil.SHIRO_CURRENT_PERM_LIST_INFO,permlist);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
