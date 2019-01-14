@@ -2,7 +2,7 @@ package com.insigma.token;
 
 import com.insigma.common.util.SUserUtil;
 import com.insigma.http.HttpRequestUtils;
-import com.insigma.mvc.URLConstraints;
+import com.insigma.mvc.UriConstraints;
 import com.insigma.mvc.component.appcontext.MyApplicationContextUtil;
 import com.insigma.mvc.model.AccessToken;
 import org.apache.commons.logging.Log;
@@ -41,7 +41,7 @@ public class TokenThread implements Runnable {
                       AccessToken accessToken=new AccessToken();
                       accessToken.setToken(token);
                       final HttpRequestUtils httpRequestUtils = MyApplicationContextUtil.getContext().getBean(HttpRequestUtils.class);
-                      AccessToken refreshAccessToken = (AccessToken) httpRequestUtils.httpPostObject(URLConstraints.API_REFRESHTOKEN,accessToken,AccessToken.class);
+                      AccessToken refreshAccessToken = (AccessToken) httpRequestUtils.httpPostObject(UriConstraints.API_REFRESHTOKEN,accessToken,AccessToken.class);
                       String refreshToken= refreshAccessToken.getToken();
                       log.debug("refreshToken="+refreshToken);
                       SUserUtil.getCurrentUser().setToken(refreshToken);

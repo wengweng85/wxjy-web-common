@@ -31,7 +31,7 @@ import com.insigma.common.util.MD5Util;
 import com.insigma.common.util.SUserUtil;
 import com.insigma.common.util.StringUtil;
 import com.insigma.http.HttpRequestUtils;
-import com.insigma.mvc.URLConstraintsSxjyGgfw;
+import com.insigma.mvc.UriConstraintsSxjyGgfw;
 import com.insigma.mvc.model.AccessToken;
 import com.insigma.mvc.model.SPermission;
 import com.insigma.mvc.model.SRole;
@@ -77,7 +77,7 @@ public class WebLoginShiroSxjyGgfwRealm extends AuthorizingRealm {
 					HashMap map=new HashMap();
 		        	map.put("username", customtoken.getUsername());
 					map.put("password", MD5Util.MD5Encode(String.valueOf(customtoken.getPassword())));
-					AccessToken accessToken = (AccessToken) httpRequestUtils.httpPostObject(URLConstraintsSxjyGgfw.API_LOGIN,map,AccessToken.class);
+					AccessToken accessToken = (AccessToken) httpRequestUtils.httpPostObject(UriConstraintsSxjyGgfw.API_LOGIN,map,AccessToken.class);
 					String token= accessToken.getToken();
 					log.debug("token="+token);
 					suser = JWT.unsign(token, SUser.class);
@@ -104,7 +104,7 @@ public class WebLoginShiroSxjyGgfwRealm extends AuthorizingRealm {
 			HashMap map=new HashMap();
 			map.put("username", suser.getUsername());
 			//用户权限
-			List<SPermission> spermlist=httpRequestUtils.httpPostReturnList(URLConstraintsSxjyGgfw.API_PERMISSIONS ,map, SPermission.class);
+			List<SPermission> spermlist=httpRequestUtils.httpPostReturnList(UriConstraintsSxjyGgfw.API_PERMISSIONS ,map, SPermission.class);
 			List<SPermission> permlist=SUserUtil.filterPersmList(spermlist);
 			suser.setSpermlist(permlist);
 			setSession(SUserUtil.SHIRO_CURRENT_USER_INFO,suser);
@@ -129,7 +129,7 @@ public class WebLoginShiroSxjyGgfwRealm extends AuthorizingRealm {
 				map.put("username", username);
 				SimpleAuthorizationInfo authenticationInfo = new SimpleAuthorizationInfo();
 				//用户角色
-				List<SRole> rolelist=  httpRequestUtils.httpPostReturnList(URLConstraintsSxjyGgfw.API_ROLES,map, SRole.class);
+				List<SRole> rolelist=  httpRequestUtils.httpPostReturnList(UriConstraintsSxjyGgfw.API_ROLES,map, SRole.class);
 				if(rolelist!=null){
 					Set<String> roleset=new HashSet<String>();
 					Iterator iterator_role=rolelist.iterator();
@@ -141,7 +141,7 @@ public class WebLoginShiroSxjyGgfwRealm extends AuthorizingRealm {
 				}
 
 				//用户权限
-				List<SPermission> permlist=  httpRequestUtils.httpPostReturnList(URLConstraintsSxjyGgfw.API_PERMISSIONS,map, SPermission.class);
+				List<SPermission> permlist=  httpRequestUtils.httpPostReturnList(UriConstraintsSxjyGgfw.API_PERMISSIONS,map, SPermission.class);
 				if(permlist!=null){
 					Set<String> set=new HashSet<String>();
 					Iterator iterator=permlist.iterator();

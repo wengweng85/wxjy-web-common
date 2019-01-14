@@ -29,14 +29,16 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		long beginTime = System.currentTimeMillis();//1、开始时间
-		startTimeThreadLocal.set(beginTime);//线程绑定变量（该数据只有当前请求的线程可见）
+		/**1、开始时间*/
+    	long beginTime = System.currentTimeMillis();
+    	/**线程绑定变量（该数据只有当前请求的线程可见）*/
+		startTimeThreadLocal.set(beginTime);
 		log.debug("-----------------preHandle--------------------");
     	if (handler instanceof HandlerMethod) {
 			request.setAttribute("contextpath", request.getContextPath());
 			Subject subject = SecurityUtils.getSubject();  
 			if(subject.isAuthenticated()){
-				//将当前登录信息设置到threadlocal中
+				/**将当前登录信息设置到threadlocal中*/
 				SUserUtil.setCurrentUser ((SUser)subject.getSession().getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO));  
 				return true;
 			}
@@ -51,8 +53,9 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	 */
 	@Override
 	public void afterCompletion( HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-		long endTime = System.currentTimeMillis();//结束时间
-		long beginTime=startTimeThreadLocal.get();//开始时间
+		/**结束时间*/
+		long endTime = System.currentTimeMillis();
+		long beginTime=startTimeThreadLocal.get();
 		log.debug("-----------------afterCompletion--------------------");
 		if((endTime-beginTime)>OVERTIME){
 			  log.info("请求地址:"+request.getRequestURL().toString()+" --- 请求耗时比较大,耗时为"+(endTime-beginTime)+"毫秒");

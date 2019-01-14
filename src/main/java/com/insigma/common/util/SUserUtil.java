@@ -20,7 +20,7 @@ public class SUserUtil {
 	
 	
 	 /** * 保存变量的ThreadLocal，保持在同一线程中同步数据. */
-    private static final ThreadLocal threadLocal = new ThreadLocal();
+    private static final ThreadLocal THREADLOCAL = new ThreadLocal();
 
     /** * 工具类的protected构造方法. */
     protected SUserUtil() {
@@ -31,10 +31,10 @@ public class SUserUtil {
 	  * @param suser
 	  */
     public static void setCurrentUser(SUser suser) {
-        Map map = (Map) threadLocal.get();
+        Map map = (Map) THREADLOCAL.get();
         if (map == null) {
-            map = new HashMap();
-            threadLocal.set(map);
+            map = new HashMap(1);
+            THREADLOCAL.set(map);
         }
 
         map.put(SHIRO_CURRENT_USER_INFO, suser);
@@ -45,10 +45,10 @@ public class SUserUtil {
 	  *  setCurrentUser
 	  */
    public static void removeCurrentUser() {
-       Map map = (Map) threadLocal.get();
+       Map map = (Map) THREADLOCAL.get();
        if (map == null) {
-           map = new HashMap();
-           threadLocal.set(map);
+           map = new HashMap(1);
+           THREADLOCAL.set(map);
        }
 
        map.put(SHIRO_CURRENT_USER_INFO, null);
@@ -59,7 +59,7 @@ public class SUserUtil {
      * @return
      */
     public static SUser getCurrentUser() {
-    	  Map map = (Map) threadLocal.get();
+    	  Map map = (Map) THREADLOCAL.get();
     	  if(map!=null){
               return (SUser)map.get(SHIRO_CURRENT_USER_INFO);
     	  }else{
@@ -68,7 +68,7 @@ public class SUserUtil {
     }
 
     public static void remove() {
-        threadLocal.remove();
+        THREADLOCAL.remove();
     }
     
   

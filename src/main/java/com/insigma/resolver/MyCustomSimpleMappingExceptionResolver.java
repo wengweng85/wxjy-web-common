@@ -1,25 +1,31 @@
 package com.insigma.resolver;
 
-import com.insigma.dto.AjaxReturnMsg;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.insigma.dto.AjaxReturnMsg;
 
-
+/**
+ *  全局异常处理类
+ * @author wengsh
+ *
+ */
 public class MyCustomSimpleMappingExceptionResolver  extends  SimpleMappingExceptionResolver {
 	Log log=LogFactory.getLog(MyCustomSimpleMappingExceptionResolver.class);
 
 
     @Override
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception e) {
-    	//是否是开发模式,如果不是开发调试模式的话，不打印控制台日志
     	log.error(e.getMessage());
         e.printStackTrace();
         // Expose ModelAndView for chosen error view.

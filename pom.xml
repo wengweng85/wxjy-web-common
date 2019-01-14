@@ -20,6 +20,25 @@
             <artifactId>wxjy-common</artifactId>
             <version>1.0.7-SNAPSHOT</version>
         </dependency>
+        <!-- shiro依赖包 -->
+        <dependency>
+          <groupId>org.apache.shiro</groupId>
+          <artifactId>shiro-core</artifactId>
+          <version>1.2.4</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        
+        <!-- shiro-cas集成依赖包 -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-cas</artifactId>
+            <version>1.2.3</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>wxjy-web-common</finalName>

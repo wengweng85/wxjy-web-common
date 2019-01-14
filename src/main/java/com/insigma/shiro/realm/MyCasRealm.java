@@ -8,27 +8,23 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import com.insigma.token.TokenThread;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.LockedAccountException;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.cas.CasRealm;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
+import org.jasig.cas.client.validation.Saml11TicketValidator;
+import org.jasig.cas.client.validation.TicketValidator;
 
-import com.insigma.common.jwt.JWT;
-import com.insigma.common.util.MD5Util;
 import com.insigma.common.util.SUserUtil;
 import com.insigma.common.util.StringUtil;
 import com.insigma.http.HttpRequestUtils;
@@ -37,14 +33,10 @@ import com.insigma.mvc.model.AccessToken;
 import com.insigma.mvc.model.SPermission;
 import com.insigma.mvc.model.SRole;
 import com.insigma.mvc.model.SUser;
-import com.insigma.shiro.cache.RedisCache;
-import com.insigma.shiro.token.CustomUsernamePasswordToken;
 
-public class WebLoginShiroRealm extends AuthorizingRealm {
+public class MyCasRealm extends CasRealm {
 
 	Log log=LogFactory.getLog(WebLoginShiroRealm.class);
-	@Autowired
-    private RedisCache<String, Set<String>> redisCache;
 	//http工具类
 	@Resource
 	private HttpRequestUtils httpRequestUtils;
@@ -55,69 +47,31 @@ public class WebLoginShiroRealm extends AuthorizingRealm {
      */
 	@Override
     public AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) throws AuthenticationException {
-		CustomUsernamePasswordToken customtoken = (CustomUsernamePasswordToken) authcToken;
-		SUser suser=null;
-		SimpleAuthenticationInfo authenticationInfo=null;
-		switch (customtoken.getLoginType().getCode()){
-			case "0":
-				//是否检验验证码
-				if("1".equals(customtoken.getIsvercode())){
-					//取得用户输入的校验码
-					String userInputValidCode =customtoken.getVerifycode();
-					//取得真实的正确校验码
-					String realRightValidCode = (String) SecurityUtils.getSubject().getSession().getAttribute("session_validator_code");
-					//清除校验码
-					SecurityUtils.getSubject().getSession().removeAttribute("session_validator_code");
-
-					if (null == userInputValidCode || !userInputValidCode.equalsIgnoreCase(realRightValidCode)) {
-						throw new AuthenticationException("验证码输入不正确");
-					}
-				}
-				//根据用户名获取用户信息
-				try {
-					HashMap map=new HashMap();
-		        	map.put("username", customtoken.getUsername());
-					map.put("password", MD5Util.MD5Encode(String.valueOf(customtoken.getPassword())));
-					AccessToken accessToken = (AccessToken) httpRequestUtils.httpPostObject(UriConstraints.API_TOKEN,map,AccessToken.class);
-					String token= accessToken.getToken();
-					/*suser = JWT.unsign(token, SUser.class);
-					suser.setToken(token);*/
-					suser=new SUser();
-					suser.setUsername(accessToken.getUsername()); 
-					suser.setToken(accessToken.getToken());
-					suser.setName(accessToken.getName());
-					authenticationInfo = new SimpleAuthenticationInfo (suser.getUsername(), MD5Util.MD5Encode(String.valueOf(customtoken.getPassword())), getName()); //realm name
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				break;
-			case "1":
-				break;
-			case "2":
-				//根据手机号、验证码登录获取用户信息
-				break;
-			case "3":
-				//根据手机号登录获取用户信息
-				break;
-			default:
-				break;
-		}
-
+		//调用父类的方法，然后授权用户
+		AuthenticationInfo authc = super.doGetAuthenticationInfo(authcToken);
+		//获取用户名
+		String username = (String) authc.getPrincipals().getPrimaryPrincipal();
 		//根据用户名获取用户信息
 		try {
-			HashMap map=new HashMap();
-			map.put("username", suser.getUsername());
-			//用户权限
-			List<SPermission> spermlist=httpRequestUtils.httpPostReturnList(UriConstraints.API_PERMISSIONS ,map, SPermission.class);
-			List<SPermission> permlist=SUserUtil.filterPersmList(spermlist);
-			setSession(SUserUtil.SHIRO_CURRENT_USER_INFO,suser);
-			setSession(SUserUtil.SHIRO_CURRENT_PERM_LIST_INFO,permlist);
+				 HashMap map=new HashMap();
+	        	 map.put("username", username);
+				 AccessToken accessToken = (AccessToken) httpRequestUtils.httpPostObject(UriConstraints.API_TOKEN,map,AccessToken.class);
+				 SUser suser=new SUser();
+				 suser.setUsername(accessToken.getUsername()); 
+				 suser.setToken(accessToken.getToken());
+				 suser.setName(accessToken.getName());
+		
+				 map=new HashMap();
+				 map.put("username", username);
+				 //用户权限
+				 List<SPermission> spermlist=httpRequestUtils.httpPostReturnList(UriConstraints.API_PERMISSIONS ,map, SPermission.class);
+				 List<SPermission> permlist=SUserUtil.filterPersmList(spermlist);
+				 setSession(SUserUtil.SHIRO_CURRENT_USER_INFO,suser);
+				 setSession(SUserUtil.SHIRO_CURRENT_PERM_LIST_INFO,permlist);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	//清理缓存
-    	clearCachedAuthorizationInfo(authenticationInfo.getPrincipals());
-	    return authenticationInfo;
+		return authc;
 	}
 
 	/**
@@ -126,6 +80,7 @@ public class WebLoginShiroRealm extends AuthorizingRealm {
 	@Override
 	public AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		String username = (String) principals.getPrimaryPrincipal();
+		System.out.println("username->"+username);
 		try{
 			if (StringUtil.isNotEmpty(username)) {
 				HashMap map=new HashMap();
@@ -187,8 +142,6 @@ public class WebLoginShiroRealm extends AuthorizingRealm {
         super.clearCachedAuthorizationInfo(principals);
         super.clearCache(principals);
         super.clearCachedAuthenticationInfo(principals);
-        redisCache.remove(Constants.getUserPermissionCacheKey(principal));
-        redisCache.remove(Constants.getUserRolesCacheKey(principal));
     }
 
 	/** 
@@ -203,5 +156,21 @@ public class WebLoginShiroRealm extends AuthorizingRealm {
                 session.setAttribute(key, value);  
             }  
         }  
+    }
+    
+    @Override
+    protected TicketValidator createTicketValidator() {
+        String urlPrefix = this.getCasServerUrlPrefix();
+        TicketValidator ticketValidator = null;
+        if("saml".equalsIgnoreCase(this.getValidationProtocol())){
+            Saml11TicketValidator saml11TicketValidator = new Saml11TicketValidator(urlPrefix);
+            saml11TicketValidator.setEncoding("utf-8");
+            ticketValidator = saml11TicketValidator;
+        }else {
+            Cas20ServiceTicketValidator cas20ServiceTicketValidator = new Cas20ServiceTicketValidator(urlPrefix);
+            cas20ServiceTicketValidator.setEncoding("utf-8");
+            ticketValidator = cas20ServiceTicketValidator;
+        }
+        return ticketValidator;
     }
 }

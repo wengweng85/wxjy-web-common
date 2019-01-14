@@ -1,9 +1,19 @@
 package com.insigma.shiro.realm;
 
+
+/**
+ *  登录类型枚举
+ * @author wengsh
+ *
+ */
 public enum LoginType {
+	/**密码登录*/
 	PASS("0","密码登录"),
+	/**免密码登录*/
 	NO_PASS("1","免密码登录"),
+	/**手机验证码登录*/
 	PHONE_CAPTCHA("2","手机验证码登录"),
+	/**手机号登录*/
 	PHONE("3","手机号登录");
 
 	

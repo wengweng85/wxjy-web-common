@@ -17,7 +17,8 @@ import javax.servlet.ServletContext;
 @Component
 public class MyApplicationContextUtil implements ApplicationContextAware {
 
-    private static ApplicationContext context;// 声明一个静态变量保存
+	/**声明一个静态变量保存*/
+    private static ApplicationContext context;
 
     @Override
     public void setApplicationContext(ApplicationContext contex) throws BeansException {
