@@ -29,7 +29,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		/**1、开始时间*/
+    	log.debug(request.getRequestURL().toString());
+    	/**1、开始时间*/
     	long beginTime = System.currentTimeMillis();
     	/**线程绑定变量（该数据只有当前请求的线程可见）*/
 		startTimeThreadLocal.set(beginTime);

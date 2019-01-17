@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
@@ -72,8 +74,15 @@ public class MyCasRealm extends CasRealm {
         	Assertion casAssertion = ticketValidator.validate(ticket, getCasService());
         	// get principal, user id and attributes
         	AttributePrincipal casPrincipal = casAssertion.getPrincipal();
-        	String userId = casPrincipal.getName();
- 
+        	log.info("casPrincipal->"+casPrincipal.getName());
+        	
+        	//½âÎöjson
+        	JSONObject jsonobject = JSONObject.fromObject(casPrincipal.getName()) ;
+        	String userId=jsonobject.getString("userid");
+            String token=jsonobject.getString("token");
+            String name=jsonobject.getString("name");
+            String username=jsonobject.getString("username");
+            
         	Map<String, Object> attributes = casPrincipal.getAttributes();
         	// refresh authentication token (user id + remember me)
         	casToken.setUserId(userId);
@@ -88,9 +97,9 @@ public class MyCasRealm extends CasRealm {
         	PrincipalCollection principalCollection = new SimplePrincipalCollection(principals, getName());
         	
         	SUser suser=new SUser();
-			suser.setUsername(userId); 
-			suser.setToken((String)attributes.get("token"));
-			suser.setName(userId);
+			suser.setUsername(username); 
+			suser.setToken(token);
+			suser.setName(name);
 	
 			HashMap  map=new HashMap();
 			map.put("username", userId);

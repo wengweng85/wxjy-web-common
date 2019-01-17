@@ -15,7 +15,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="wxjy-common" />
+    <orderEntry type="library" name="Maven: com.insigma:wxjy-common:1.0.7-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="wxjy-common-model" />
     <orderEntry type="library" name="Maven: cn.jpush.api:jpush-client:3.3.9" level="project" />
     <orderEntry type="library" name="Maven: cn.jpush.api:jiguang-common:1.1.3" level="project" />
@@ -25,6 +25,7 @@
     <orderEntry type="library" name="Maven: org.apache.shiro:shiro-spring:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.shiro:shiro-cas:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.jasig.cas.client:cas-client-core:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:dubbo:2.6.1" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.20.0-GA" level="project" />
