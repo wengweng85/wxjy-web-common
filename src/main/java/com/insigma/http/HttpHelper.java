@@ -250,7 +250,7 @@ public class HttpHelper {
         if (httpClient == null) {
             httpClient = createHttpClient();
         }
-        log.info("get请求url:" + url);
+        log.debug("get请求url:" + url);
         HttpGet get = new HttpGet(urlSign(url));
         if (SUserUtil.getCurrentUser() != null) {
             get.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
@@ -328,7 +328,7 @@ public class HttpHelper {
      * @throws IOException
      */
     private static CloseableHttpResponse executePostResponse(CloseableHttpClient httpClient, String url, Object paramsObj,  String referer, String cookie, String charset,boolean isencrpty) throws Exception {
-    	log.info("post请求url:" + url);
+    	log.debug("post请求url:" + url);
     	if (httpClient == null) {
             httpClient = createHttpClient();
         }
@@ -592,7 +592,7 @@ public class HttpHelper {
         CloseableHttpClient httpClient = null;
         try {
             HttpGet httpget = new HttpGet(urlSign(url));
-            log.info("get请求url:" + url);
+            log.debug("get请求url:" + url);
             if (SUserUtil.getCurrentUser() != null) {
                 httpget.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -695,7 +695,7 @@ public class HttpHelper {
         try {
             HttpGet httpget = new HttpGet(urlSign(url));
             response = httpClient.execute(httpget);
-            log.info("get请求url:" + url);
+            log.debug("get请求url:" + url);
             HttpEntity entity = response.getEntity();
             if (entity == null) {
                 return false;
@@ -748,7 +748,7 @@ public class HttpHelper {
     private static HttpEntity getEntity(Object paramsObj, String charset,boolean isencrpty) throws Exception {
     	ContentType contenttype=ContentType.APPLICATION_JSON;
     	if (paramsObj == null) {
-            log.info("当前未传入参数信息，无法生成HttpEntity");
+            log.error("当前未传入参数信息，无法生成HttpEntity");
             return null;
         }
     	if(contenttype.equals(ContentType.APPLICATION_JSON)){
@@ -774,12 +774,12 @@ public class HttpHelper {
         StringBuffer sb=null;
         JSONObject jsonobject= JSONObject.fromObject(t,jsonConfig);
         sb=new StringBuffer(jsonobject.toString());
-        log.info("请求参数:" +   sb.toString());
+        log.debug("请求参数:" +   sb.toString());
         if(isencrpty){
         	 //获取加密及签名数据
             RSAUtils.EncryptDataStruct encryptDataStruct=RSAUtils.encryptByAesAndRsaPublickey(sb.toString());
             String data=JSONObject.fromObject(encryptDataStruct).toString();
-            log.info("请求参数,加密后:" +data);
+            log.debug("请求参数,加密后:" +data);
             return data;
         }else{
            return sb.toString();
@@ -799,7 +799,7 @@ public class HttpHelper {
         parseClass(object, object.getClass(), sb);
         if (sb.length() > 0) {
             String param = sb.deleteCharAt(sb.length() - 1).toString();
-            log.info("请求参数:" + param);
+            log.debug("请求参数:" + param);
             return param;
         } else {
             return "";
@@ -1075,7 +1075,7 @@ public class HttpHelper {
         }else{
              url+= "?"+SignUtils.signature();
         }
-        log.info("请求地址签名:" + url);
+        log.debug("请求地址签名:" + url);
         return url;
     }
 }

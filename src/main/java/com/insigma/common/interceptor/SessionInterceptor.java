@@ -59,7 +59,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		long beginTime=startTimeThreadLocal.get();
 		log.debug("-----------------afterCompletion--------------------");
 		if((endTime-beginTime)>OVERTIME){
-			  log.info("请求地址:"+request.getRequestURL().toString()+" --- 请求耗时比较大,耗时为"+(endTime-beginTime)+"毫秒");
+			  log.debug("请求地址:"+request.getRequestURL().toString()+" --- 请求耗时"+(endTime-beginTime)+"毫秒");
 		}
 		SUserUtil.remove();
 	}

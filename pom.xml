@@ -40,6 +40,14 @@
             <version>1.2.3</version>
         </dependency>
         
+         
+        <!-- sxjyggfw-common-model-->
+        <dependency>
+            <groupId>com.insigma</groupId>
+            <artifactId>sxjyggfw-common-model</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        
         <!-- guava -->
         <dependency>
 		    <groupId>com.google.guava</groupId>
