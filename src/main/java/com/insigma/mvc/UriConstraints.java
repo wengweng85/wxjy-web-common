@@ -37,4 +37,13 @@ public class UriConstraints {
     
     //获取上传文件信息
     public static String API_FILE_INFO=API_BASE+"  /api/getFileUploadInfo";
+    
+    //获取上传文件信息
+    public static String API_FILE_UPLOADINFOLIST=API_BASE+"  /api/getFileUploadInfoList";
+    
+    //上传图片
+    public static String  API_FILE_UPLOADIMAGE=API_BASE+"/api/uploadFile/uploadImage";
+    
+    //获取文件数量
+    public static String API_FILE_UploadFileNumberInfo=API_BASE+"/api/UploadFileNumberInfo";
 }

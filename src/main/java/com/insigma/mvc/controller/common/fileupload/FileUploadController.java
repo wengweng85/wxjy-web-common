@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.github.pagehelper.PageInfo;
-import com.insigma.common.util.SUserUtil;
 import com.insigma.dto.AjaxReturnMsg;
 import com.insigma.http.FileUploadUtils;
 import com.insigma.http.HttpRequestUtils;
 import com.insigma.mvc.MvcHelper;
 import com.insigma.mvc.UriConstraints;
-import com.insigma.mvc.model.SUser;
 import com.insigma.mvc.model.SuploadFile;
 
 /**
@@ -64,8 +62,7 @@ public class FileUploadController extends MvcHelper {
     @RequestMapping("/uploadFile/uploadImage/{fileStyle}/{businessType}/{fileRandomFlag}")
     public AjaxReturnMsg uploadImage(HttpServletRequest request,@PathVariable(value = "fileStyle") String fileStyle,@PathVariable(value = "businessType") String businessType,@PathVariable(value = "fileRandomFlag") String fileRandomFlag) {
         try {
-        	SUser suser = (SUser) request.getSession().getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO);
-            fileUploadUtils.uploadFile_ForProvince(request, suser.getUsername(), businessType, fileStyle,fileRandomFlag, "/api/uploadFile/uploadImage");
+            fileUploadUtils.uploadFile_ForProvince(request, businessType, fileStyle,fileRandomFlag, UriConstraints.API_FILE_UPLOADIMAGE);
             return this.success("上传成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,14 +76,11 @@ public class FileUploadController extends MvcHelper {
     @ResponseBody
     @RequestMapping("/getUploadFileNumberInfo/{fileStyle}/{businessType}/{fileRandomFlag}")
     public AjaxReturnMsg getUploadFileNumberInfo(HttpSession session,@PathVariable String fileStyle,@PathVariable String businessType,@PathVariable String fileRandomFlag) throws Exception {
-        SUser suser = (SUser) session.getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO);
-        String aac002 = suser.getUsername();
         HashMap<String, String> map = new HashMap<>();
-        map.put("aaa002", aac002);
         map.put("aaa004",fileStyle);
         map.put("aaa010", businessType);
         map.put("aaa011",fileRandomFlag);
-        JSONObject object = httpRequestUtils.httpPost("/api/UploadFileNumberInfo", map);
+        JSONObject object = httpRequestUtils.httpPost(UriConstraints.API_FILE_UploadFileNumberInfo, map);
         return this.success(object.getJSONObject("obj"));
     }
 
@@ -99,13 +93,11 @@ public class FileUploadController extends MvcHelper {
         String filetype = request.getParameter("fileStyle");
         String businessType = request.getParameter("businessType");
         String fileRandomFlag = request.getParameter("fileRandomFlag");
-        SUser suser = (SUser) session.getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO);
         SuploadFile suploadFile = new SuploadFile();
-        suploadFile.setAaa002(suser.getUsername());
         suploadFile.setAaa004(filetype);
         suploadFile.setAaa010(businessType);
         suploadFile.setAaa011(fileRandomFlag);
-        List<SuploadFile> list = httpRequestUtils.httpPostReturnList("/api/getFileUploadInfoList", suploadFile);
+        List<SuploadFile> list = httpRequestUtils.httpPostReturnList(UriConstraints.API_FILE_UPLOADINFOLIST, suploadFile);
         return list;
     }
 
@@ -116,9 +108,7 @@ public class FileUploadController extends MvcHelper {
     @RequestMapping("/getFileUploadInfo")
     public AjaxReturnMsg getUploadInfo(HttpServletRequest request,HttpSession session) throws Exception {
         String filetype = request.getParameter("filetype");
-        SUser suser = (SUser) session.getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO);
         SuploadFile suploadFile = new SuploadFile();
-        suploadFile.setAaa002(suser.getUsername());
         suploadFile.setAaa004(filetype);
         PageInfo<SuploadFile> pageInfo = httpRequestUtils.httpPostReturnPage(UriConstraints.API_FILE_INFO, suploadFile);
         return this.success(pageInfo);
@@ -134,10 +124,8 @@ public class FileUploadController extends MvcHelper {
     @ResponseBody
     @RequestMapping("/fileUploadInfo/delete/{fileStyle}/{businessType}/{fileRandomFlag}")
     public AjaxReturnMsg delUpLoadFile(HttpSession session,@PathVariable String fileStyle,@PathVariable String businessType,@PathVariable String fileRandomFlag) throws Exception {
-        SUser suser = (SUser) session.getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO);
         HashMap<String, String> map = new HashMap<>();
         map.put("aaa004", fileStyle);
-        map.put("aaa002", suser.getUsername());
         map.put("aaa010", businessType);
         map.put("aaa011",fileRandomFlag);
         JSONObject object = httpRequestUtils.httpPost(UriConstraints.API_FILE_DELETE, map);

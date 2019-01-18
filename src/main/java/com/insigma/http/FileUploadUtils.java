@@ -85,7 +85,7 @@ public class FileUploadUtils {
      * @return
      * @throws Exception
      */
-    public SuploadFile uploadFile_ForProvince(HttpServletRequest request, String userid, String file_bus_id, String file_bus_type,String fileRandomFlag, String url) throws Exception {
+    public SuploadFile uploadFile_ForProvince(HttpServletRequest request, String file_bus_id, String file_bus_type,String fileRandomFlag, String url) throws Exception {
         String desc = request.getParameter("desc");
         // **********************参数初始化*********************
         //创建一个通用的多部分解析器
@@ -124,7 +124,7 @@ public class FileUploadUtils {
                 //上传并记录日志
                 File file = File.createTempFile(prefix, endfix);
                 multipartFile.transferTo(file);
-                JSONObject result = httpRequestUtils.httpUploadFile_ForProvince(url, file, originalFilename, file_bus_type, file_bus_id, userid, fileRandomFlag,desc);
+                JSONObject result = httpRequestUtils.httpUploadFile_ForProvince(url, file, originalFilename, file_bus_type, file_bus_id, fileRandomFlag,desc);
                 if (!result.getBoolean("success")) {
                     throw new Exception(result.getString("message"));
                 }

@@ -694,6 +694,9 @@ public class HttpHelper {
         FileOutputStream fout = null;
         try {
             HttpGet httpget = new HttpGet(urlSign(url));
+            if (SUserUtil.getCurrentUser() != null) {
+            	httpget.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
+            }
             response = httpClient.execute(httpget);
             log.debug("get请求url:" + url);
             HttpEntity entity = response.getEntity();
@@ -994,8 +997,8 @@ public class HttpHelper {
      * @return
      * @throws IOException
      */
-    public static HttpResult executeUploadFileProvince(String remoteFileUrl,  File localFile, String file_name, String file_bus_type, String file_bus_id, String userid,String fileRandomFlag, String desc,boolean isencrpty) throws Exception {
-        return executeUploadFileForProvince(remoteFileUrl, localFile, file_name, file_bus_type, file_bus_id, userid,fileRandomFlag, DEFAULT_CHARSET, true, desc,isencrpty);
+    public static HttpResult executeUploadFileProvince(String remoteFileUrl,  File localFile, String file_name, String file_bus_type, String file_bus_id,String fileRandomFlag, String desc,boolean isencrpty) throws Exception {
+        return executeUploadFileForProvince(remoteFileUrl, localFile, file_name, file_bus_type, file_bus_id,fileRandomFlag, DEFAULT_CHARSET, true, desc,isencrpty);
     }
 
     /**
@@ -1013,19 +1016,21 @@ public class HttpHelper {
      * @return
      * @throws IOException
      */
-    public static HttpResult executeUploadFileForProvince(String url,  File localFile, String file_name, String file_bus_type, String file_bus_id, String userid,String fileRandomFlag, String charset, boolean closeHttpClient, String desc,boolean isencrpty) throws Exception {
+    public static HttpResult executeUploadFileForProvince(String url,  File localFile, String file_name, String file_bus_type, String file_bus_id, String fileRandomFlag, String charset, boolean closeHttpClient, String desc,boolean isencrpty) throws Exception {
         CloseableHttpResponse httpResponse = null;
         CloseableHttpClient httpClient = null;
         try {
             httpClient = createHttpClient();
             HttpPost httpPost = new HttpPost(url);
+            if (SUserUtil.getCurrentUser() != null) {
+            	httpPost.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
+            }
             // 把文件转换成流对象FileBody
             FileBody fileBody = new FileBody(localFile);
             //form参数
             StringBody file_name_body = new StringBody(URLEncoder.encode(file_name, "UTF-8"), ContentType.APPLICATION_FORM_URLENCODED);
             StringBody file_bus_type_body = new StringBody(file_bus_type, ContentType.APPLICATION_FORM_URLENCODED);
             StringBody file_bus_id_body = new StringBody(file_bus_id, ContentType.APPLICATION_FORM_URLENCODED);
-            StringBody userid_body = new StringBody(userid, ContentType.APPLICATION_FORM_URLENCODED);
             StringBody fileRandomFlag_body = new StringBody(fileRandomFlag, ContentType.APPLICATION_FORM_URLENCODED);
             if(desc == null){
                 desc = "";
@@ -1037,7 +1042,6 @@ public class HttpHelper {
                     .addPart("file_name", file_name_body)
                     .addPart("file_bus_type", file_bus_type_body)
                     .addPart("file_bus_id", file_bus_id_body)
-                    .addPart("userid", userid_body)
                     .addPart("fileRandomFlag", fileRandomFlag_body)
                     .addPart("desc", desc_body).setCharset(CharsetUtils.get("UTF-8")).build();
             httpPost.setEntity(reqEntity);

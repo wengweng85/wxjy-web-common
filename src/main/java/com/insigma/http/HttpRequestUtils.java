@@ -293,9 +293,9 @@ public class HttpRequestUtils<T> {
     }
 
     //最多跑一次文件上传专用
-    public JSONObject httpUploadFile_ForProvince(String url, File file, String file_name, String file_bus_type, String file_bus_id, String userid, String desc) throws Exception {
+    public JSONObject httpUploadFile_ForProvince(String url, File file, String file_name, String file_bus_type, String file_bus_id, String desc) throws Exception {
         try {
-            HttpResult httpresult = HttpHelper.executeUploadFile(gateway_base_url + url,  file, file_name, file_bus_type, file_bus_id, userid, desc, isencrpty);
+            HttpResult httpresult = HttpHelper.executeUploadFile(gateway_base_url + url,  file, file_name, file_bus_type, file_bus_id, desc, isencrpty);
             return parseHttpResult(httpresult, url);
         } catch (IOException e) {
             throw new AppException(e);
@@ -341,9 +341,9 @@ public class HttpRequestUtils<T> {
     }
 
     //最多跑一次文件上传专用
-    public JSONObject httpUploadFile_ForProvince(String url, File file, String file_name, String file_bus_type, String file_bus_id, String userid,String fileRandomFlag, String desc) throws Exception {
+    public JSONObject httpUploadFile_ForProvince(String url, File file, String file_name, String file_bus_type, String file_bus_id,String fileRandomFlag, String desc) throws Exception {
         try {
-            HttpResult httpresult = HttpHelper.executeUploadFileProvince(gateway_base_url + url,  file, file_name, file_bus_type, file_bus_id, userid,fileRandomFlag,desc,isencrpty);
+            HttpResult httpresult = HttpHelper.executeUploadFileProvince(gateway_base_url + url,  file, file_name, file_bus_type, file_bus_id,fileRandomFlag,desc,isencrpty);
             return parseHttpResult(httpresult, url);
         } catch (IOException e) {
             throw new AppException(e);
