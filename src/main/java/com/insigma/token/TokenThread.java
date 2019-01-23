@@ -1,10 +1,10 @@
 package com.insigma.token;
 
-import com.insigma.common.util.SUserUtil;
 import com.insigma.http.HttpRequestUtils;
 import com.insigma.mvc.UriConstraints;
 import com.insigma.mvc.component.appcontext.MyApplicationContextUtil;
 import com.insigma.mvc.model.AccessToken;
+import com.insigma.shiro.realm.SUserUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,13 +13,14 @@ import java.util.Date;
 
 /**
  * 定义Thread类，刷新jwt token
- * @author Administrator
+ * @author admin
  *
  */
 public class TokenThread implements Runnable { 
 
   private static Log log = LogFactory.getLog(TokenThread.class);
-  
+
+  @Override
   public void run() {  
       while (true) {  
            try {  

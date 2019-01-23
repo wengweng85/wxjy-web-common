@@ -10,9 +10,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * MyApplicationContextUtil
+ * 获取springbean工具类
  *
- * @author xxx
+ * @author admin
  */
 @Component
 public class MyApplicationContextUtil implements ApplicationContextAware {

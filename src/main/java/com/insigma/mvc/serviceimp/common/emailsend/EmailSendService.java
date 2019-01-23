@@ -9,7 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import com.insigma.resolver.AppException;
 
 /**
- * Created by xxx on 2015-01-11.
+ * EmailSendService
+ * 邮件发送服务
+ * @author  admin
  */
 public class EmailSendService {
 

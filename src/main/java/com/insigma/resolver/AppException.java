@@ -2,8 +2,7 @@ package com.insigma.resolver;
 
 /**
  * 自定义项目异常
- * @author xxx
- * @date 2014-11-25
+ * @author admin
  *
  */
 public class AppException extends Exception {  

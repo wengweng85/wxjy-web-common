@@ -1,48 +1,59 @@
 package com.insigma.http;
 
-import com.github.pagehelper.PageInfo;
-import com.insigma.dto.SysCode;
-import com.insigma.json.JsonDateValueProcessor;
-import com.insigma.resolver.AppException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.entity.ContentType;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+
+import com.github.pagehelper.PageInfo;
+import com.insigma.dto.SysCode;
+import com.insigma.json.JsonDateValueProcessor;
+import com.insigma.resolver.AppException;
+
 
 /**
  * httprequest工具类
  *
  * @param <T>
- * @author xxx
+ * @author admin
  */
 public class HttpRequestUtils<T> {
 
 
-	private static Logger logger = LoggerFactory.getLogger(HttpRequestUtils.class);
+	private static Log log = LogFactory.getLog(HttpRequestUtils.class);
 	
     public JsonConfig jsonConfig;
     
     private String gateway_base_url;
 
+    private ContentType contentType;
+
     //是否加解密
     private boolean isencrpty;
     
-    public HttpRequestUtils(String gateway_base_url,boolean isencrpty) {
+    public HttpRequestUtils(String gateway_base_url,boolean isencrpty,String contentType) {
         jsonConfig = new JsonConfig();
         jsonConfig.registerJsonValueProcessor(Date.class, new JsonDateValueProcessor());
         this.gateway_base_url = gateway_base_url;
         this.isencrpty=isencrpty;
+        if(contentType.toUpperCase().equals("APPLICATION_JSON")){
+        	this.contentType=ContentType.APPLICATION_JSON;
+        }else if(contentType.toUpperCase().equals("APPLICATION_FORM_URLENCODED")){
+        	this.contentType=ContentType.APPLICATION_FORM_URLENCODED;
+        }
+  
     }
 
     /**
@@ -179,6 +190,8 @@ public class HttpRequestUtils<T> {
     public List<T> httpPostReturnList(String url, Class c) throws AppException {
         return toList(httpPostReturnArray(url, new HashMap()), c);
     }
+    
+    
 
     /**
      * 返回对象list
@@ -191,6 +204,16 @@ public class HttpRequestUtils<T> {
         return toList(httpPostReturnArray(url, map), c);
     }
 
+    /**
+     * 发送post请求 返回json对象
+     *
+     * @param url 路径
+     * @return
+     */
+    public T httpPostObject(String url, T t) throws AppException {
+        return (T) JSONObject.toBean(httpPost(url, t).getJSONObject("obj"), t.getClass());
+    }
+    
     /**
      * 发送get请求 返回json对象
      *
@@ -211,7 +234,7 @@ public class HttpRequestUtils<T> {
      */
     public JSONObject httpPost(String url) throws AppException {
         try {
-            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, new HashMap(), isencrpty);
+            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, new HashMap(), isencrpty,contentType);
             return parseHttpResult(httpresult, url);
         } catch (Exception e) {
             throw new AppException(e);
@@ -229,7 +252,7 @@ public class HttpRequestUtils<T> {
      */
     public JSONObject httpPost(String url, HashMap map) throws AppException {
         try {
-            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, map,isencrpty);
+            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, map,isencrpty,contentType);
             return parseHttpResult(httpresult, url);
         } catch (Exception e) {
             throw new AppException(e);
@@ -246,7 +269,7 @@ public class HttpRequestUtils<T> {
      */
     public JSONObject httpPost(String url, T t) throws AppException {
         try {
-            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, t,isencrpty);
+            HttpResult httpresult = HttpHelper.executePost(gateway_base_url + url, t,isencrpty,contentType);
             return parseHttpResult(httpresult, url);
         } catch (Exception e) {
             throw new AppException(e);
@@ -292,6 +315,24 @@ public class HttpRequestUtils<T> {
         }
     }
 
+    /**
+     * 发送文件(excel)
+     * @param url
+     * @param file
+     * @param excel_batch_excel_type
+     * @param mincolumns
+     * @return
+     * @throws AppException
+     */
+    public JSONObject executeUploadExcelFile(String url, File file, String excel_batch_excel_type,String excel_batch_assistid, String mincolumns) throws Exception {
+        try {
+            HttpResult httpresult = HttpHelper.executeUploadExcelFile(gateway_base_url + url, file, excel_batch_excel_type,excel_batch_assistid,  mincolumns,isencrpty);
+            return parseHttpResult(httpresult, url);
+        } catch (IOException e) {
+            throw new AppException(e);
+        }
+    }
+
     //最多跑一次文件上传专用
     public JSONObject httpUploadFile_ForProvince(String url, File file, String file_name, String file_bus_type, String file_bus_id, String desc) throws Exception {
         try {
@@ -314,9 +355,10 @@ public class HttpRequestUtils<T> {
         if (httpresult.getStatusCode() == HttpStatus.SC_OK) {
         	JSONObject jsonResult = JSONObject.fromObject(httpresult.getContent());
             /**是否成功*/
-            int syscode = jsonResult.getInt ("syscode");
+            int syscode = Integer.valueOf(jsonResult.getString("syscode"));
             if (!(syscode==SysCode.SYS_CODE_200.getCode())) {
-               //如果发现token为空或者token失效,重新登录
+            	log.info("url="+url+"  result:"+httpresult.getContent());
+            	//如果发现token为空或者token失效,重新登录
             	if (syscode==SysCode.SYS_TOKEN_EMPTY.getCode() || syscode==SysCode.SYS_TOKEN_ERROR.getCode()) {
                 	try{
                 		Subject subject = SecurityUtils.getSubject(); 
@@ -324,7 +366,7 @@ public class HttpRequestUtils<T> {
                     		if(subject.isAuthenticated()){
                     			subject.logout();
                     		}
-                    	}
+                    }
                 	}catch(Exception e){
                 		  e.printStackTrace();
                 	}
@@ -335,7 +377,6 @@ public class HttpRequestUtils<T> {
             }
             return jsonResult;
         } else {
-        	 logger.info(httpresult.getStatusCode()+":"+httpresult.getContent());
              throw new AppException("接口(" + url + ") 调用失败,http状态码:" + httpresult.getStatusCode());
         }
     }
@@ -357,13 +398,90 @@ public class HttpRequestUtils<T> {
      * @return
      * @throws AppException
      */
-    public File httpDownLoadFile(String url, String localdir) throws AppException {
+    public File httpDownLoadFile(String url) throws AppException {
         File file;
         try {
-            file = HttpHelper.executeDownloadFile(gateway_base_url + url,  localdir);
+            file = HttpHelper.executeDownloadFile(gateway_base_url + url);
         } catch (IOException e) {
             throw new AppException(e);
         }
         return file;
     }
+
+    /**
+     * 发送delete 请求
+     *
+     * @param url
+     * @return
+     * @throws AppException
+     */
+    public JSONObject httpDelete(String url) throws AppException {
+        try {
+            HttpResult httpresult = HttpHelper.executeDelete(gateway_base_url + url);
+            return parseHttpResult(httpresult, url);
+        } catch (Exception e) {
+            throw new AppException(e);
+        }
+    }
+    
+    /**
+     * 发送get请求 返回json对象
+     *
+     * @param url 路径
+     * @return
+     */
+    public JSONObject httpGetReturnObject(String url) throws AppException {
+        return httpGet(url).getJSONObject("obj");
+    }
+
+
+    /**
+     * 发送get请求 返回json对象
+     *
+     * @param url 路径
+     * @return
+     */
+    public T httpGetObject(String url, Class c) throws AppException {
+        return (T) JSONObject.toBean(httpGet(url).getJSONObject("obj"), c);
+    }
+
+
+    /**
+     * 返回对象list
+     *
+     * @param url
+     * @param c
+     * @return
+     * @throws AppException
+     */
+    public List<T> httpGetReturnList(String url, Class c) throws AppException {
+        return toList(httpGetReturnArray(url), c);
+    }
+    
+    /**
+     * 发送get请求 返回json数组
+     *
+     * @param url 路径
+     * @return
+     */
+    private JSONArray httpGetReturnArray(String url) throws AppException {
+        return httpGet(url).getJSONArray("obj");
+    }
+    
+    /**
+     * 发送get请求
+     *
+     * @param url
+     * @return
+     * @throws AppException
+     */
+    public JSONObject httpGet(String url) throws AppException {
+        try {
+            HttpResult httpresult = HttpHelper.executeGet(gateway_base_url + url,isencrpty);
+            return parseHttpResult(httpresult, url);
+        } catch (Exception e) {
+            throw new AppException(e);
+        }
+    }
+  
 }

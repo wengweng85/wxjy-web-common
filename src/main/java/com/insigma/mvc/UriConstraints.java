@@ -2,7 +2,7 @@ package com.insigma.mvc;
 
 /**
  * api地址约束
- * @author wengsh
+ * @author admin
  *
  */
 public class UriConstraints {
@@ -22,8 +22,7 @@ public class UriConstraints {
 	//权限
     public static String API_PERMISSIONS=API_AUTH+"/permissions";
     
-    
-    // 代码类型、过滤条件获取代码 
+    // 代码类型、过滤条件获取代码
     public static String  API_CODEVALUEBYTYPEANDPARENT= API_BASE+"/codetype/queryCodeValueByCodeTypeAndParent";
     
     // 代码类型获取参数列表

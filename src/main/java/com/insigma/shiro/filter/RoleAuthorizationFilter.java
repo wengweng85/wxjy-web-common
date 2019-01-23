@@ -12,7 +12,7 @@ import org.apache.shiro.web.filter.authz.AuthorizationFilter;
 
 /**
  * 自定义的角色过滤器,用户只有有一个角色满足,就可以通过验证
- * @author xxx
+ * @author admin
  *
  */
 public class RoleAuthorizationFilter extends AuthorizationFilter {

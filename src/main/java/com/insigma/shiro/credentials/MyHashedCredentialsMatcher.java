@@ -6,6 +6,9 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 
+/**
+ * 自定义shiro校验算法
+ */
 public class MyHashedCredentialsMatcher extends HashedCredentialsMatcher {
 
 	@Override

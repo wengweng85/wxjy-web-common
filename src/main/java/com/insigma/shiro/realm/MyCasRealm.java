@@ -1,13 +1,11 @@
 package com.insigma.shiro.realm;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
+import com.insigma.http.HttpRequestUtils;
+import com.insigma.mvc.UriConstraints;
+import com.insigma.mvc.model.SPermission;
+import com.insigma.mvc.model.SUser;
+import com.insigma.resolver.AppException;
 import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
@@ -30,13 +28,15 @@ import org.jasig.cas.client.validation.Assertion;
 import org.jasig.cas.client.validation.TicketValidationException;
 import org.jasig.cas.client.validation.TicketValidator;
 
-import com.insigma.common.util.SUserUtil;
-import com.insigma.http.HttpRequestUtils;
-import com.insigma.mvc.UriConstraints;
-import com.insigma.mvc.model.SPermission;
-import com.insigma.mvc.model.SUser;
-import com.insigma.resolver.AppException;
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+
+/**
+ * 自定义shiro realm 基于casrealm
+ */
 public class MyCasRealm extends CasRealm {
 
 	Log log=LogFactory.getLog(WebLoginShiroRealm.class);

@@ -19,7 +19,7 @@ import com.insigma.dto.AjaxReturnMsg;
 
 /**
  * 自定义authc校验器
- * @author xxx
+ * @author admin
  *
  */
 public class SimpleFormAuthenticationFilter extends FormAuthenticationFilter {

@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.RateLimiter;
 /**
  * 基于令牌桶的限流过滤器
  *
- * @author xxx
+ * @author admin
  */
 public class RateLimitInterceptor extends HandlerInterceptorAdapter {
 
@@ -22,10 +22,12 @@ public class RateLimitInterceptor extends HandlerInterceptorAdapter {
     private RateLimiter globalRateLimiter;
 
     public RateLimitInterceptor(int rate) {
-        if (rate > 0)
+        if (rate > 0){
             globalRateLimiter = RateLimiter.create(rate);
-        else
+        }
+        else {
             throw new RuntimeException("rate must greater than zero");
+        }
     }
 
     public void setRate(int rate){

@@ -2,7 +2,7 @@ package com.insigma.common.contraint;
 
 /**
  * 自定义常量
- * @author wengsh
+ * @author admin
  *
  */
 public class Contraints {
@@ -14,7 +14,7 @@ public class Contraints {
 	/**
 	 * redis过期时间
 	 */
-	public final static int      REDISEXPITEDTIME=3*3600 * 1000;
+	public final static int  REDISEXPITEDTIME=3*3600 * 1000;
 	/**
 	 * 用户类型 个人
 	 */

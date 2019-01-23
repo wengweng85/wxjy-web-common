@@ -5,7 +5,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import com.insigma.shiro.realm.LoginType;
 
 /**
- * Created on 2014/11/11.
+ * CustomUsernamePasswordToken
  */
 public class CustomUsernamePasswordToken extends UsernamePasswordToken {
 
@@ -17,8 +17,10 @@ public class CustomUsernamePasswordToken extends UsernamePasswordToken {
     //用于存储用户输入的校验码
     private String verifycode;
 
+    //是否验证校验码
     private String isvercode;
 
+    //登录类型
     private LoginType loginType;
 
     public CustomUsernamePasswordToken(String loginname, char[] password,boolean rememberMe, String host, String verifycode,String isvercode) {

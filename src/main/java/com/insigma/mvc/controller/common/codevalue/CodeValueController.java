@@ -23,13 +23,16 @@ import com.insigma.common.util.CodeValueUtil;
 import com.insigma.http.HttpRequestUtils;
 import com.insigma.mvc.MvcHelper;
 import com.insigma.mvc.UriConstraints;
+import com.insigma.mvc.UriConstraintsPxjd;
 import com.insigma.mvc.model.CodeValue;
 import com.insigma.resolver.AppException;
 
 /**
- * Created by xxx on 2017/8/23.
+ * 参数代码
+ * @author admin
  */
 @Controller
+@RequestMapping("/sys/codetype")
 public class CodeValueController extends MvcHelper {
 	
 	 @Resource
@@ -42,7 +45,7 @@ public class CodeValueController extends MvcHelper {
      * @return
      * @throws Exception
      */
-    //@RequestMapping("/common/getAreaData")
+    @RequestMapping("/getAreaData")
     public ModelAndView getAreaData(Model model) throws Exception {
         ModelAndView modelAndView = new ModelAndView("/common/codevalue/area_data");
         List<CodeValue> provinces = CodeValueUtil.getCodeListByCodeType("AAB800");
@@ -115,7 +118,7 @@ public class CodeValueController extends MvcHelper {
      * @return
      * @throws Exception
      */
-    //@RequestMapping("/common/getJobData")
+    @RequestMapping("/getJobData")
     public ModelAndView getJobData(Model model) throws Exception {
         ModelAndView modelAndView = new ModelAndView("/common/codevalue/job_data");
 
@@ -180,7 +183,7 @@ public class CodeValueController extends MvcHelper {
      * @return
      * @throws Exception
      */
-    //@RequestMapping("/common/getIndustryData")
+    @RequestMapping("/getIndustryData")
     public ModelAndView getIndustryData(Model model) throws Exception {
         ModelAndView modelAndView = new ModelAndView("/common/codevalue/industry_data");
 
@@ -228,7 +231,7 @@ public class CodeValueController extends MvcHelper {
      * @return
      * @throws Exception
      */
-    //@RequestMapping("/common/getMajorData")
+    @RequestMapping("/getMajorData")
     public ModelAndView getMajorData(Model model) throws Exception {
         ModelAndView modelAndView = new ModelAndView("/common/codevalue/major_data");
         List<CodeValue> major_one_list = CodeValueUtil.getCodeListByCodeType("AAB809");
@@ -292,7 +295,7 @@ public class CodeValueController extends MvcHelper {
 	 * @return
 	 * @throws com.insigma.resolver.AppException
 	 */
-	@RequestMapping(value = "/sys/codetype/toCodeValuesuggest")
+	@RequestMapping(value = "/toCodeValuesuggest")
 	public ModelAndView toCodeValuesuggest(HttpServletRequest request, HttpServletResponse response,CodeValue codevalue) throws Exception {
 		String callback_fun_name=request.getParameter("callback_fun_name");
 		String codetype=request.getParameter("codetype");
@@ -312,13 +315,27 @@ public class CodeValueController extends MvcHelper {
 	  * @return
 	  * @throws AppException
 	  */
-	 @RequestMapping(value = "/sys/codetype/queryByCodeTypeAndParent")
+	 @RequestMapping(value = "/queryByCodeTypeAndParent")
 	 @ResponseBody
 	 public List<CodeValue> queryByCodeTypeAndParent(HttpServletRequest request, HttpServletResponse response,CodeValue codevalue) throws AppException {
 		   List<CodeValue> list = httpRequestUtils.httpPostReturnList(UriConstraints.API_CODEVALUEBYTYPEANDPARENT, codevalue);
 		   return list;
 	 }
 	
+	 /**
+	  * 通过代码类型、过滤条件获取代码 
+	  * @param request
+	  * @param response
+	  * @param codevalue
+	  * @return
+	  * @throws AppException
+	  */
+	 @RequestMapping(value = "/getCodeValueList")
+	 @ResponseBody
+	 public List<CodeValue> getCodeValueList(HttpServletRequest request, HttpServletResponse response,CodeValue codevalue) throws AppException {
+			List<CodeValue>  list =(List<CodeValue> )httpRequestUtils.httpPostReturnList(UriConstraintsPxjd.API_INITCODEVALUELIST,codevalue);
+			return list;
+	 }
 	 
 	 /**
 	  * 通过代码类型获取参数列表
@@ -328,9 +345,9 @@ public class CodeValueController extends MvcHelper {
 	  * @return
 	  * @throws AppException
 	  */
-	 @RequestMapping(value = "/sys/codetype/getCodeValueList")
+	 @RequestMapping(value = "/getCodeValueListFromZuul")
 	 @ResponseBody
-	 public List<CodeValue> getCodeValueList(HttpServletRequest request, HttpServletResponse response,CodeValue codevalue) throws AppException {
+	 public List<CodeValue> getCodeValueListFromZuul(HttpServletRequest request, HttpServletResponse response,CodeValue codevalue) throws AppException {
 		   List<CodeValue> list = httpRequestUtils.httpPostReturnList(UriConstraints.API_INITCODEVALUELIST, codevalue);
 		   return list;
 	 }
@@ -344,7 +361,7 @@ public class CodeValueController extends MvcHelper {
 		 * @return
 		 * @throws com.insigma.resolver.AppException
 		 */
-		@RequestMapping(value = "/sys/codetype/treedata/{code_type}")
+		@RequestMapping(value = "/treedata/{code_type}")
 		@ResponseBody
 		public List<CodeValue> treedata(HttpServletRequest request, HttpServletResponse response,@PathVariable String code_type) throws AppException {
 			String id=request.getParameter("id");

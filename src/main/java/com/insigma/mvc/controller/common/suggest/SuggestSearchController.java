@@ -20,6 +20,7 @@ import com.insigma.resolver.AppException;
 
 /**
  * ½¨ÒéËÑË÷controller
+ * @author admin
  */
 @Controller
 @RequestMapping(value = "/common/suggest")

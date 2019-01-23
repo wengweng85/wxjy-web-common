@@ -51,6 +51,7 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -77,16 +78,17 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.CharsetUtils;
 import org.apache.http.util.EntityUtils;
 
+import com.insigma.common.listener.AppConfig;
 import com.insigma.common.rsa.RSAUtils;
 import com.insigma.common.rsa.SignUtils;
-import com.insigma.common.util.SUserUtil;
 import com.insigma.json.JsonDateValueProcessor;
+import com.insigma.resolver.AppException;
+import com.insigma.shiro.realm.SUserUtil;
 
 /**
  * Http辅助工具类</br>
- * 依赖HttpClient 4.5.x版本
  *
- * @author comven
+ * @author admin
  */
 public class HttpHelper {
 
@@ -95,6 +97,7 @@ public class HttpHelper {
     private static final String DEFAULT_CHARSET = "UTF-8";// 默认请求编码
     private static final int DEFAULT_SOCKET_TIMEOUT = 60000;// 默认等待响应时间(毫秒)
     private static final int DEFAULT_RETRY_TIMES = 0;// 默认执行重试的次数
+    private static final ContentType DEFAULT_CONTEXTTYPE =ContentType.APPLICATION_JSON;//默认contextype
 
     public static JsonConfig jsonConfig;
 
@@ -102,18 +105,19 @@ public class HttpHelper {
         jsonConfig = new JsonConfig();
         jsonConfig.registerJsonValueProcessor(Date.class, new JsonDateValueProcessor());
         jsonConfig.setJsonPropertyFilter( new PropertyFilter(){
+            @Override
             public boolean apply(Object source/* 属性的拥有者 */ , String name /*属性名字*/ , Object value/* 属性值 */ ){
-                //过滤token
-                if(name.equals("token")){
+            //过滤token
+            if(name.equals("token")){
+                return true;
+            }
+            if(value instanceof List){
+                List<Object> list=(List<Object> )value;
+                if(list.size()==0){
                     return true;
                 }
-                if(value instanceof List){
-                    List<Object> list=(List<Object> )value;
-                    if(list.size()==0){
-                        return true;
-                    }
-                }
-                return null==value||value.equals("");
+            }
+            return null==value||value.equals("");
             }
         });
     }
@@ -251,7 +255,7 @@ public class HttpHelper {
             httpClient = createHttpClient();
         }
         log.debug("get请求url:" + url);
-        HttpGet get = new HttpGet(urlSign(url));
+        HttpGet get = new HttpGet(urlAppend(url));
         if (SUserUtil.getCurrentUser() != null) {
             get.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
         }
@@ -267,9 +271,9 @@ public class HttpHelper {
      * @return HttpResult
      * @throws IOException
      */
-    public static HttpResult executePost(String url, Object paramsObj, boolean isencrpty) throws Exception {
+    public static HttpResult executePost(String url, Object paramsObj, boolean isencrpty,ContentType contentType) throws Exception {
         CloseableHttpClient httpClient = createHttpClient(DEFAULT_SOCKET_TIMEOUT);
-        return executePost(httpClient, url, paramsObj, null, null, DEFAULT_CHARSET, true,isencrpty);
+        return executePost(httpClient, url, paramsObj, null, null, DEFAULT_CHARSET, true,isencrpty,contentType);
     }
 
     /**
@@ -286,11 +290,11 @@ public class HttpHelper {
      * @throws IOException
      * @throws ClientProtocolException
      */
-    public static HttpResult executePost(CloseableHttpClient httpClient, String url, Object paramsObj,  String referer, String cookie, String charset, boolean closeHttpClient,boolean isencrpty) throws Exception {
+    public static HttpResult executePost(CloseableHttpClient httpClient, String url, Object paramsObj,  String referer, String cookie, String charset, boolean closeHttpClient,boolean isencrpty ,ContentType contentType) throws Exception {
         CloseableHttpResponse httpResponse = null;
         try {
             charset = getCharset(charset);
-            httpResponse = executePostResponse(httpClient, url, paramsObj, referer, cookie, charset,isencrpty);
+            httpResponse = executePostResponse(httpClient, url, paramsObj, referer, cookie, charset,isencrpty,contentType);
             //Http请求状态码
             Integer statusCode = httpResponse.getStatusLine().getStatusCode();
             if(statusCode.equals(HttpStatus.SC_OK)){
@@ -327,17 +331,17 @@ public class HttpHelper {
      * @return CloseableHttpResponse
      * @throws IOException
      */
-    private static CloseableHttpResponse executePostResponse(CloseableHttpClient httpClient, String url, Object paramsObj,  String referer, String cookie, String charset,boolean isencrpty) throws Exception {
+    private static CloseableHttpResponse executePostResponse(CloseableHttpClient httpClient, String url, Object paramsObj,  String referer, String cookie, String charset,boolean isencrpty,ContentType contentType) throws Exception {
     	log.debug("post请求url:" + url);
     	if (httpClient == null) {
             httpClient = createHttpClient();
         }
-        HttpPost post = new HttpPost(urlSign(url));
+        HttpPost post = new HttpPost(urlAppend(url));
         if (SUserUtil.getCurrentUser() != null) {
             post.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
         }
         // 设置参数
-        HttpEntity httpEntity = getEntity(paramsObj, charset,isencrpty);
+        HttpEntity httpEntity = getEntity(paramsObj, charset,isencrpty,contentType);
         if (httpEntity != null) {
             post.setEntity(httpEntity);
         }
@@ -379,6 +383,19 @@ public class HttpHelper {
     }
 
     /**
+     * 执行excel文件上传
+     * @param remoteFileUrl
+     * @param localFile
+     * @param excel_batch_excel_type
+     * @param mincolumns
+     * @return
+     * @throws IOException
+     */
+    public static HttpResult executeUploadExcelFile(String remoteFileUrl, File localFile, String excel_batch_excel_type,String excel_batch_assistid, String mincolumns,boolean isencrpty) throws Exception {
+        return executeUploadExcelFile(remoteFileUrl, localFile, excel_batch_excel_type,excel_batch_assistid, mincolumns,DEFAULT_CHARSET, true,isencrpty);
+    }
+
+    /**
      * 执行文件上传
      *
      * @param url
@@ -398,7 +415,7 @@ public class HttpHelper {
         CloseableHttpClient httpClient = null;
         try {
             httpClient = createHttpClient();
-            HttpPost httpPost = new HttpPost(urlSign(url));
+            HttpPost httpPost = new HttpPost(urlAppend(url));
             if (SUserUtil.getCurrentUser() != null) {
                 httpPost.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -460,7 +477,7 @@ public class HttpHelper {
         CloseableHttpClient httpClient = null;
         try {
             httpClient = createHttpClient();
-            HttpPost httpPost = new HttpPost(urlSign(url));
+            HttpPost httpPost = new HttpPost(urlAppend(url));
             if (SUserUtil.getCurrentUser() != null) {
             	httpPost.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -483,6 +500,65 @@ public class HttpHelper {
                     .addPart("file_bus_id", file_bus_id_body)
                     .addPart("userid", userid_body)
                     .addPart("desc", desc_body).setCharset(CharsetUtils.get("UTF-8")).build();
+            httpPost.setEntity(reqEntity);
+            httpResponse = httpClient.execute(httpPost);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            String content = getResult(httpResponse, charset,isencrpty);
+            return new HttpResult(statusCode, content);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (closeHttpClient && httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 执行文件上传
+     *
+     * @param url
+     * @param localFile
+     * @param excel_batch_excel_type
+     * @param excel_batch_assistid
+     * @param mincolumns
+     * @param charset         请求编码，默认UTF-8
+     * @param closeHttpClient 执行请求结束后是否关闭HttpClient客户端实例
+     * @return
+     * @throws IOException
+     */
+    public static HttpResult executeUploadExcelFile(String url,  File localFile, String excel_batch_excel_type,String excel_batch_assistid, String mincolumns, String charset, boolean closeHttpClient,boolean isencrpty) throws Exception {
+        CloseableHttpResponse httpResponse = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createHttpClient();
+            HttpPost httpPost = new HttpPost(urlAppend(url));
+            //header
+            if (SUserUtil.getCurrentUser() != null) {
+                httpPost.setHeader("Authorization", "bearer " + SUserUtil.getCurrentUser().getToken());
+            }
+            // 把文件转换成流对象FileBody
+            FileBody fileBody = new FileBody(localFile);
+            //form参数
+            StringBody excel_batch_excel_type_body = new StringBody(URLEncoder.encode(excel_batch_excel_type, "UTF-8"), ContentType.APPLICATION_FORM_URLENCODED);
+            StringBody excel_batch_assistid_body = new StringBody(URLEncoder.encode(excel_batch_assistid, "UTF-8"), ContentType.APPLICATION_FORM_URLENCODED);
+            StringBody mincolumns_body = new StringBody(mincolumns, ContentType.APPLICATION_FORM_URLENCODED);
+            // 以浏览器兼容模式运行，防止文件名乱码。
+            HttpEntity reqEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+                    .addPart("uploadFile", fileBody)
+                    .addPart("excel_batch_excel_type", excel_batch_excel_type_body)
+                    .addPart("excel_batch_assistid", excel_batch_assistid_body)
+                    .addPart("mincolumns", mincolumns_body)
+                    .setCharset(CharsetUtils.get("UTF-8")).build();
             httpPost.setEntity(reqEntity);
             httpResponse = httpClient.execute(httpPost);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -538,7 +614,7 @@ public class HttpHelper {
             }
             resultBytes = baos.toByteArray();
             ByteArrayEntity byteArrayEntity = new ByteArrayEntity(resultBytes, ContentType.APPLICATION_OCTET_STREAM);
-            HttpPost httpPost = new HttpPost(urlSign(url));
+            HttpPost httpPost = new HttpPost(urlAppend(url));
             if (SUserUtil.getCurrentUser() != null) {
             	httpPost.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -576,22 +652,88 @@ public class HttpHelper {
     }
 
     /**
+     * 执行delete 请求
+     *
+     * @param url    远程URL地址
+     * @return HttpResult
+     * @throws IOException
+     */
+    public static HttpResult executeDelete(String url) throws Exception {
+        CloseableHttpClient httpClient = createHttpClient(DEFAULT_SOCKET_TIMEOUT);
+        return executeDelete(httpClient, url, DEFAULT_CHARSET, true);
+    }
+
+    /**
+     * 执行Http delete 请求
+     *
+     * @param httpClient      HttpClient客户端实例，传入null会自动创建一个
+     * @param url             请求的远程地址
+     * @param charset         请求编码，默认UTF8
+     * @param closeHttpClient 执行请求结束后是否关闭HttpClient客户端实例
+     * @return HttpResult
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    public static HttpResult executeDelete(CloseableHttpClient httpClient, String url,String charset, boolean closeHttpClient) throws Exception {
+        CloseableHttpResponse httpResponse = null;
+        try {
+            charset = getCharset(charset);
+            httpResponse = executeDeleteResponse(httpClient, urlAppend(url));
+            //Http请求状态码
+            Integer statusCode = httpResponse.getStatusLine().getStatusCode();
+            String content = getResult(httpResponse, charset,false);
+            return new HttpResult(statusCode, content);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (closeHttpClient && httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param httpClient httpclient对象
+     * @param url        执行GET的URL地址
+     * @return CloseableHttpResponse
+     * @throws IOException
+     */
+    public static CloseableHttpResponse executeDeleteResponse(CloseableHttpClient httpClient, String url) throws IOException {
+        if (httpClient == null) {
+            httpClient = createHttpClient();
+        }
+        HttpDelete httpdelete = new HttpDelete(url);
+        if (SUserUtil.getCurrentUser() != null) {
+            httpdelete.setHeader("Authorization", "bearer " + SUserUtil.getCurrentUser().getToken());
+        }
+        return httpClient.execute(httpdelete);
+    }
+
+    /**
      * 执行文件下载
      *
      * @param url
      * @param
-     * @param localdir 本地存储文件路径
      * @return
      * @throws ClientProtocolException
      * @throws IOException
      */
-    public static File executeDownloadFile(String url,  String localdir) throws ClientProtocolException, IOException {
+    public static File executeDownloadFile(String url) throws ClientProtocolException, IOException {
         CloseableHttpResponse response = null;
         InputStream in;
         FileOutputStream fout = null;
         CloseableHttpClient httpClient = null;
         try {
-            HttpGet httpget = new HttpGet(urlSign(url));
+            HttpGet httpget = new HttpGet(urlAppend(url));
             log.debug("get请求url:" + url);
             if (SUserUtil.getCurrentUser() != null) {
                 httpget.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
@@ -605,7 +747,11 @@ public class HttpHelper {
             }
             in = entity.getContent();
             String filename = getFileName(response);
-            File file = new File(localdir, filename);
+            //获取文件名
+            String pattern = filename.substring(0,filename.lastIndexOf("."));
+            //获取文件名后缀
+            String suffix  = filename.substring(filename.lastIndexOf("."));
+            File file = File.createTempFile(pattern, suffix);
             fout = new FileOutputStream(file);
             int l;
             byte[] tmp = new byte[1024];
@@ -693,7 +839,7 @@ public class HttpHelper {
         InputStream in = null;
         FileOutputStream fout = null;
         try {
-            HttpGet httpget = new HttpGet(urlSign(url));
+            HttpGet httpget = new HttpGet(urlAppend(url));
             if (SUserUtil.getCurrentUser() != null) {
             	httpget.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -749,21 +895,36 @@ public class HttpHelper {
      * @throws UnsupportedEncodingException
      */
     private static HttpEntity getEntity(Object paramsObj, String charset,boolean isencrpty) throws Exception {
-    	ContentType contenttype=ContentType.APPLICATION_JSON;
-    	if (paramsObj == null) {
+    	return getEntity(paramsObj,charset,isencrpty,DEFAULT_CONTEXTTYPE);
+    }
+
+
+    /**
+     * 根据参数获取请求的Entity
+     * @param paramsObj
+     * @param charset
+     * @param isencrpty
+     * @param contentType
+     * @return
+     * @throws Exception
+     */
+    private static HttpEntity getEntity(Object paramsObj, String charset,boolean isencrpty,ContentType contentType) throws Exception {
+        if (paramsObj == null) {
             log.error("当前未传入参数信息，无法生成HttpEntity");
             return null;
         }
-    	if(contenttype.equals(ContentType.APPLICATION_JSON)){
-    		StringEntity httpEntity=null;
-    		httpEntity = new StringEntity(parseToJson(paramsObj,isencrpty), charset);
-    		httpEntity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        if(contentType.equals(ContentType.APPLICATION_JSON)){
+            StringEntity httpEntity = new StringEntity(parseToJson(paramsObj,isencrpty), charset);
+            httpEntity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
             return httpEntity;
-    	}else{
+        }else if(contentType.equals(ContentType.APPLICATION_FORM_URLENCODED)){
             StringEntity httpEntity = new StringEntity(parseURLPair(paramsObj), charset);
             httpEntity.setContentType(ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
             return httpEntity;
+        }else{
+            throw  new AppException("不支持"+contentType.getMimeType()+"请求类型");
         }
+
     }
 
     /**
@@ -993,7 +1154,6 @@ public class HttpHelper {
      * @param file_name
      * @param file_bus_type
      * @param file_bus_id
-     * @param userid
      * @return
      * @throws IOException
      */
@@ -1010,7 +1170,6 @@ public class HttpHelper {
      * @param file_name
      * @param file_bus_type
      * @param file_bus_id
-     * @param userid
      * @param charset         请求编码，默认UTF-8
      * @param closeHttpClient 执行请求结束后是否关闭HttpClient客户端实例
      * @return
@@ -1021,7 +1180,7 @@ public class HttpHelper {
         CloseableHttpClient httpClient = null;
         try {
             httpClient = createHttpClient();
-            HttpPost httpPost = new HttpPost(url);
+            HttpPost httpPost = new HttpPost(urlAppend(url));
             if (SUserUtil.getCurrentUser() != null) {
             	httpPost.setHeader("Authorization", "Bearer " + SUserUtil.getCurrentUser().getToken());
             }
@@ -1069,17 +1228,57 @@ public class HttpHelper {
 
 
     /**
+     * 请求地址附加公共信息
+     * @param url
+     * @return
+     */
+    private static String urlAppend(String url){
+        return urlAppend(url,true,true);
+    }
+
+
+    /**
      * 请求地址数字签名
      * @param url
      * @return
      */
-    public static String urlSign(String url){
+    private static String urlAppend(String url,boolean isSign,boolean isAppkey){
+      if(isSign){
+          url=urlSignAppend(url);
+      }
+      if(isAppkey){
+          url=urlAppkeyAppend(url);
+      }
+      return url;
+    }
+
+    /**
+     * 请求地址数字签名
+     * @param url
+     * @return
+     */
+    private static String urlSignAppend(String url){
         if(url.indexOf("?")!=-1){
-             url+= "&"+SignUtils.signature();
+            url+= "&"+SignUtils.signature();
         }else{
-             url+= "?"+SignUtils.signature();
+            url+= "?"+SignUtils.signature();
         }
         log.debug("请求地址签名:" + url);
+        return url;
+    }
+
+    /**
+     * 请求地址增加appkey
+     * @param url
+     * @return
+     */
+    private static String urlAppkeyAppend(String url){
+        if(url.indexOf("?")!=-1){
+            url+= "&appkey="+ AppConfig.getProperties("appkey");
+        }else{
+            url+= "?appkey"+AppConfig.getProperties("appkey");
+        }
+        log.debug("请求地址appkey:" + url);
         return url;
     }
 }

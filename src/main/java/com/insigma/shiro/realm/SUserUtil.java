@@ -1,16 +1,17 @@
-package com.insigma.common.util;
+package com.insigma.shiro.realm;
+
+import com.insigma.mvc.model.SPermission;
+import com.insigma.mvc.model.SUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.insigma.mvc.model.SPermission;
-import com.insigma.mvc.model.SUser;
-
 /**
  * 系统工具类
- * @author wengsh
+ * 通用threadlocal保存当前登录人员信息
+ * @author admin
  *
  */
 public class SUserUtil {

@@ -8,7 +8,10 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
+/**
+ * 短信发送服务
+ * @author admin
+ */
 public class SmsService {
 
 	Log log= LogFactory.getLog(SmsService.class);

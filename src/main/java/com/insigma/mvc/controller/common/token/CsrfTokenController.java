@@ -14,7 +14,9 @@ import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
- * Created by xxx on 2015-01-14.
+ * CsrfTokenController
+ * ¹ýÂËcsrf
+ * @author  admin
  */
 @Controller
 public class CsrfTokenController extends MvcHelper {

@@ -23,7 +23,8 @@ import com.insigma.mvc.MvcHelper;
 import com.insigma.resolver.AppException;
 
 /**
- * Created by Administrator on 2015-01-14.
+ * 获取及校验验证码
+ * @author 验证码
  */
 @Controller
 @RequestMapping(value = "/verifycode")

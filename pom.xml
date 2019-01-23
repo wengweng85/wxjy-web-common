@@ -5,6 +5,11 @@
     <packaging>jar</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <name>wxjy-web-common</name>
+    <description>
+        网站前端框架公共开发包
+        包括常见工具类、权限shiro realm、自定义异常类
+        文件上传、参数等相关公共请求方法
+    </description>
     <url>http://maven.apache.org</url>
     <!-- 父级依赖 -->
     <parent>
@@ -39,15 +44,7 @@
             <artifactId>shiro-cas</artifactId>
             <version>1.2.3</version>
         </dependency>
-        
-         
-        <!-- sxjyggfw-common-model-->
-        <dependency>
-            <groupId>com.insigma</groupId>
-            <artifactId>sxjyggfw-common-model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        
+
         <!-- guava -->
         <dependency>
 		    <groupId>com.google.guava</groupId>

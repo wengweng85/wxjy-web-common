@@ -5,7 +5,7 @@ import java.util.UUID;
 
 /**
  * tokenπ§æﬂ¿‡
- * @author xxx
+ * @author admin
  *
  */
 public class TokenUtil {

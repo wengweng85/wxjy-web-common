@@ -25,7 +25,6 @@
     <orderEntry type="library" name="Maven: org.apache.shiro:shiro-spring:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.shiro:shiro-cas:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.jasig.cas.client:cas-client-core:3.2.1" level="project" />
-    <orderEntry type="library" name="Maven: com.insigma:sxjyggfw-common-model:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:dubbo:2.6.1" level="project" />

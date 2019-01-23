@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 /**
  * 重复提交token检验器
  *
- * @author xxx
+ * @author admin
  */
 public class TokenInterceptor extends HandlerInterceptorAdapter {
 

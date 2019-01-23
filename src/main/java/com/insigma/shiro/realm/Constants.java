@@ -3,7 +3,7 @@ package com.insigma.shiro.realm;
 
 /**
  * redis cache key get
- * @author xxx
+ * @author admin
  *
  */
 public class Constants {

@@ -1,9 +1,15 @@
 package com.insigma.mvc.controller.common.login;
 
-import java.util.HashMap;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.insigma.common.rsa.RSAUtils;
+import com.insigma.common.util.MD5Util;
+import com.insigma.dto.AjaxReturnMsg;
+import com.insigma.http.HttpRequestUtils;
+import com.insigma.mvc.MvcHelper;
+import com.insigma.mvc.model.SUser;
+import com.insigma.shiro.realm.LoginType;
+import com.insigma.shiro.realm.SUserUtil;
+import com.insigma.shiro.token.CustomUsernamePasswordToken;
+import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
@@ -20,24 +26,25 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.insigma.common.rsa.RSAUtils;
-import com.insigma.common.util.SUserUtil;
-import com.insigma.dto.AjaxReturnMsg;
-import com.insigma.mvc.MvcHelper;
-import com.insigma.mvc.model.SUser;
-import com.insigma.shiro.realm.LoginType;
-import com.insigma.shiro.token.CustomUsernamePasswordToken;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 
 /**
  * 登录controller
  * 
- * @author Administrator
+ * @author admin
  *
  */
 @Controller
 public class LoginController extends MvcHelper {
 
 	Log log = LogFactory.getLog(LoginController.class);
+
+	//http工具类
+	@Resource
+	private HttpRequestUtils httpRequestUtils;
 
 	/**
 	 * 跳转至登录页面
@@ -50,7 +57,7 @@ public class LoginController extends MvcHelper {
 		Subject subject = SecurityUtils.getSubject();
 		// 是否已经登录-是-直接定向到主页面
 		if (subject.isAuthenticated()) {
-			ModelAndView modelAndView = new ModelAndView("redirect:/index");
+			ModelAndView modelAndView = new ModelAndView("redirect:/");
 			return modelAndView;
 		}
 		// 登录页面
@@ -130,5 +137,61 @@ public class LoginController extends MvcHelper {
 		Subject user = SecurityUtils.getSubject();
 		user.logout();
 		return "redirect:/gotologin";
+	}
+
+	/**
+	 * 密码修改页面
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/updPassword/view")
+	public ModelAndView toUpdPassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Subject subject = SecurityUtils.getSubject();
+		//是否已经登录-是-直接定向密码修改页面
+		if(subject.isAuthenticated()){
+			ModelAndView modelAndView=new ModelAndView("login/updPassword");
+			return modelAndView;
+		}
+		//登录页面
+		else{
+			ModelAndView modelAndView=new ModelAndView("login/login");
+			HashMap<String, String> map = new HashMap<String, String>();
+			String contextPath = request.getContextPath();
+			map.put("contextPath", contextPath);
+			//生成rsakey
+			RSAUtils.getPublicKeyMap(map);
+			modelAndView.addAllObjects(map);
+			return modelAndView;
+		}
+	}
+
+	/**
+	 * 密码修改
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/updPassword/upd", method = RequestMethod.POST)
+	@ResponseBody
+	public AjaxReturnMsg<String> updPassword(HttpServletRequest request, String password_old, String password_new) throws Exception {
+		password_old = MD5Util.MD5Encode(password_old);
+		Subject subject = SecurityUtils.getSubject();
+		//是否已经登录
+		if(!subject.isAuthenticated()){
+			return this.error("请登录后再操作");
+		}else {
+			String pwd = SUserUtil.getCurrentUser().getPassword();
+			if(!password_old.equals(pwd)) {
+				return this.error("原密码错误，请重新输入");
+			}else {
+				SUser suser = new SUser();
+				suser.setUserid(SUserUtil.getCurrentUser().getUserid());
+				suser.setPassword(MD5Util.MD5Encode(password_new));
+				JSONObject obj = httpRequestUtils.httpPost("/api/webLoginExtra/updPassword", suser);
+				if((Boolean) obj.get("success")) {
+					SUserUtil.getCurrentUser().setPassword(suser.getPassword());
+				}
+				return (AjaxReturnMsg) JSONObject.toBean(obj, AjaxReturnMsg.class);
+			}
+		}
 	}
 }

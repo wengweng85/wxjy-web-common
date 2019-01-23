@@ -1,8 +1,7 @@
 package com.insigma.common.interceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.insigma.mvc.model.SUser;
+import com.insigma.shiro.realm.SUserUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
@@ -11,8 +10,8 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.insigma.common.util.SUserUtil;
-import com.insigma.mvc.model.SUser;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 通用登录相关session Interceptor过滤器
@@ -40,7 +39,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 			Subject subject = SecurityUtils.getSubject();  
 			if(subject.isAuthenticated()){
 				/**将当前登录信息设置到threadlocal中*/
-				SUserUtil.setCurrentUser ((SUser)subject.getSession().getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO));  
+				SUserUtil.setCurrentUser ((SUser)subject.getSession().getAttribute(SUserUtil.SHIRO_CURRENT_USER_INFO));
 				return true;
 			}
             return true;

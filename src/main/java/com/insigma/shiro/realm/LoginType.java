@@ -3,7 +3,7 @@ package com.insigma.shiro.realm;
 
 /**
  *  µÇÂ¼ÀàĞÍÃ¶¾Ù
- * @author wengsh
+ * @author admin
  *
  */
 public enum LoginType {

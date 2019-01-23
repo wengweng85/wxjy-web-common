@@ -1,5 +1,8 @@
 package com.insigma.http;
 
+/**
+ * httpclient 请求返回结果
+ */
 public class HttpResult {
 
     private int statusCode;
